@@ -108,7 +108,6 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Settings):
 
 
 if __name__ == '__main__':
-
      app = QtWidgets.QApplication(sys.argv)
      window = MainWindow()
      window.show()
