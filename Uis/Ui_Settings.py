@@ -12,6 +12,9 @@ class Ui_Settings(object):
     def setupUi(self, Dialog):
         Dialog.setObjectName("SettingsDialog")
         Dialog.resize(366, 176)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(":/pic/设置.png"), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        Dialog.setWindowIcon(icon)
         self.verticalLayout = QtWidgets.QVBoxLayout(Dialog)
         self.verticalLayout.setObjectName("verticalLayout")
         self.formLayout = QtWidgets.QFormLayout()
@@ -64,6 +67,7 @@ class Ui_Settings(object):
     def retranslateUi(self, Dialog):
         _translate = QtCore.QCoreApplication.translate
         Dialog.setWindowTitle(_translate("Dialog", "Dialog"))
+        Dialog.setWindowTitle(_translate("Dialog", "设置"))
         self.hlLebel.setText(_translate("Dialog", "历史记录长度"))
         self.gtLabel.setText(_translate("Dialog", "问候语"))
         self.dsLabel.setText(_translate("Dialog", "模式"))
