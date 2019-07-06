@@ -11,7 +11,7 @@ class Config():
                 f.write('[drawlots]\n')
             self.config.read('Config.ini', 'UTF_8')
             self.config['drawlots']['greeting'] = "Good Luck"
-            self.config['drawlots']['drawState'] = '抽取'
+            self.config['drawlots']['drawState'] = '1'
             self.config['drawlots']['lotCount'] = '0'
             self.config['drawlots']['historyLen'] = '1'
             self.config['drawlots']['lotsDir'] = "lots.json"
