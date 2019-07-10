@@ -14,12 +14,24 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super(MainWindow, self).__init__()
         self.setupUi(self)
-        self.outPutLabel.setText(settings['greeting'])
+        self.outputLabel.setText(settings['greeting'])
         self.timer = QtCore.QTimer()
         self.timer.timeout.connect(self.next)
         self.mainButton.clicked.connect(self.drawLot)
-        self.pushButton_6.clicked.connect(self.editLotPool)
-        self.pushButton_5.clicked.connect(self.editSettings)
+        self.poolButton.clicked.connect(self.editLotPool)
+        self.settingButton.clicked.connect(self.editSettings)
+        self.onTop = False
+
+    def keyPressEvent(self, event):
+        if (event.key() == Qt.Key_T and QtWidgets.QApplication.keyboardModifiers() == Qt.ControlModifier):
+                if self.onTop:
+                    self.setWindowFlags(QtCore.Qt.Window)
+                    self.onTop = False
+                    self.show()
+                else:
+                    self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
+                    self.onTop = True
+                    self.show()
 
     def editLotPool(self):
         lotPoolDialog = LotPoolDialog()
@@ -31,25 +43,25 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def drawLot(self):
         if settings['drawstate'] == 1:
-            self.mainButton.setIcon(self.icon1)
-            self.outPutLabel.setText(lotPool.drawLot())
+            self.mainButton.setIcon(self.startIcon)
+            self.outputLabel.setText(lotPool.drawLot())
         elif settings['drawstate'] == 2:
             if not lotPool.running:
-                self.mainButton.setIcon(self.icon5)
+                self.mainButton.setIcon(self.pauseIcon)
                 self.next()
                 lotPool.running = True
             else:
-                self.mainButton.setIcon(self.icon1)
+                self.mainButton.setIcon(self.startIcon)
                 self.timer.stop()
                 lotPool.running = False
 
     def next(self):
         text = lotPool.next()
-        self.outPutLabel.setText(text)
+        self.outputLabel.setText(text)
         if text != '签池不能为空!':
             self.timer.start(20)
         else:
-            self.mainButton.setIcon(self.icon1)
+            self.mainButton.setIcon(self.startIcon)
             self.timer.stop()
             lotPool.running = False
 
@@ -105,10 +117,8 @@ class SettingsDialog(QtWidgets.QDialog, Ui_Settings):
         settings['drawState'] = number
 
 
-
-
 if __name__ == '__main__':
-     app = QtWidgets.QApplication(sys.argv)
-     window = MainWindow()
-     window.show()
-     sys.exit(app.exec_())
+    app = QtWidgets.QApplication(sys.argv)
+    window = MainWindow()
+    window.show()
+    sys.exit(app.exec_())
