@@ -55,6 +55,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, DrawLotsBaseWindow):
 
     def keyPressEvent(self, event):
         if (event.key() == Qt.Key_T and QtWidgets.QApplication.keyboardModifiers() == Qt.ControlModifier):
+            if lotPool.running: self.stop()
             self.hide()
             self.simple.show(self.outputLabel.text())
 
@@ -80,6 +81,7 @@ class SimpleWindow(QtWidgets.QDialog, Ui_SimpleWindow, DrawLotsBaseWindow):
 
     def keyPressEvent(self, event):
         if (event.key() == Qt.Key_T and QtWidgets.QApplication.keyboardModifiers() == Qt.ControlModifier):
+            if lotPool.running: self.stop()
             self.hide()
             self.master.show()
             self.master.outputLabel.setText(self.outputLabel.text())
