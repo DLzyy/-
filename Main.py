@@ -1,45 +1,20 @@
-import sys
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5.QtCore import *
 from PyQt5.QtGui import *
  
 from Uis.Ui_MainWindow import Ui_MainWindow
+from Uis.Ui_SimpleWindow import Ui_SimpleWindow
 from Uis.Ui_LotPool import Ui_LotPool
 from Uis.Ui_Settings import Ui_Settings
 
 from lot_pool import lotPool
 from Settings import settings
 
-class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
-    def __init__(self):
-        super(MainWindow, self).__init__()
-        self.setupUi(self)
-        self.outputLabel.setText(settings['greeting'])
-        self.timer = QtCore.QTimer()
-        self.timer.timeout.connect(self.next)
-        self.mainButton.clicked.connect(self.drawLot)
-        self.poolButton.clicked.connect(self.editLotPool)
-        self.settingButton.clicked.connect(self.editSettings)
-        self.onTop = False
+from abc import ABCMeta, abstractmethod
+import sys
 
-    def keyPressEvent(self, event):
-        if (event.key() == Qt.Key_T and QtWidgets.QApplication.keyboardModifiers() == Qt.ControlModifier):
-                if self.onTop:
-                    self.setWindowFlags(QtCore.Qt.Window)
-                    self.onTop = False
-                    self.show()
-                else:
-                    self.setWindowFlags(QtCore.Qt.Window | QtCore.Qt.WindowStaysOnTopHint)
-                    self.onTop = True
-                    self.show()
-
-    def editLotPool(self):
-        lotPoolDialog = LotPoolDialog()
-        lotPoolDialog.exec_()
-    
-    def editSettings(self):
-        settingsDialog = SettingsDialog()
-        settingsDialog.exec_()
+class DrawLotsBaseWindow():
+    __metaclass__ = ABCMeta
 
     def drawLot(self):
         if settings['drawstate'] == 1:
@@ -51,9 +26,7 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 self.next()
                 lotPool.running = True
             else:
-                self.mainButton.setIcon(self.startIcon)
-                self.timer.stop()
-                lotPool.running = False
+                self.stop()
 
     def next(self):
         text = lotPool.next()
@@ -61,10 +34,59 @@ class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         if text != '签池不能为空!':
             self.timer.start(20)
         else:
-            self.mainButton.setIcon(self.startIcon)
-            self.timer.stop()
-            lotPool.running = False
+            self.stop()
 
+    def stop(self):
+        self.mainButton.setIcon(self.startIcon)
+        self.timer.stop()
+        lotPool.running = False
+
+class MainWindow(QtWidgets.QMainWindow, Ui_MainWindow, DrawLotsBaseWindow):
+    def __init__(self):
+        super(MainWindow, self).__init__()
+        self.setupUi(self)
+        self.outputLabel.setText(settings['greeting'])
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.next)
+        self.mainButton.clicked.connect(self.drawLot)
+        self.poolButton.clicked.connect(self.editLotPool)
+        self.settingButton.clicked.connect(self.editSettings)
+        self.simple = SimpleWindow(self)
+
+    def keyPressEvent(self, event):
+        if (event.key() == Qt.Key_T and QtWidgets.QApplication.keyboardModifiers() == Qt.ControlModifier):
+            self.hide()
+            self.simple.show(self.outputLabel.text())
+
+    def editLotPool(self):
+        if lotPool.running: self.stop()
+        lotPoolDialog = LotPoolDialog()
+        lotPoolDialog.exec_()
+    
+    def editSettings(self):
+        if lotPool.running: self.stop()
+        settingsDialog = SettingsDialog()
+        settingsDialog.exec_()
+
+class SimpleWindow(QtWidgets.QDialog, Ui_SimpleWindow, DrawLotsBaseWindow):
+    def __init__(self, master):
+        super(SimpleWindow, self).__init__()
+        self.setupUi(self)
+        self.outputLabel.setText(settings['greeting'])
+        self.master = master
+        self.timer = QtCore.QTimer()
+        self.timer.timeout.connect(self.next)
+        self.mainButton.clicked.connect(self.drawLot)
+
+    def keyPressEvent(self, event):
+        if (event.key() == Qt.Key_T and QtWidgets.QApplication.keyboardModifiers() == Qt.ControlModifier):
+            self.hide()
+            self.master.show()
+            self.master.outputLabel.setText(self.outputLabel.text())
+
+    def show(self, text=None):
+        self.outputLabel.setText(text if text else settings['greeting'])
+        self.exec_()
 
 class LotPoolDialog(QtWidgets.QDialog, Ui_LotPool):
     def __init__(self):
